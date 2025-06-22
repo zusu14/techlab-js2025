@@ -4,10 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>イントロクイズ</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <div id="quiz-container">
+      <h2 id="question-number"></h2>
+      <audio src="" id="audio" controls></audio>
+      <div>
+        <input type="text" id="answerInput" placeholder="曲名を入力" />
+        <button id="submitBtn">回答する</button>
+      </div>
+      <div id="result"></div>
+    </div>
     <!-- jquery読み込み -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/main.js"></script>
