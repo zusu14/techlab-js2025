@@ -1,50 +1,50 @@
 // クイズ問題データ（GitHub用）
-// const quizData = [
-//   {
-//     title: "穏やかな朝",
-//     audio: "audio_sample/穏やかな朝.mp3",
-//   },
-//   {
-//     title: "2:23AM",
-//     audio: "audio_sample/2_23_AM.mp3",
-//   },
-//   {
-//     title: "Morning",
-//     audio: "audio_sample/Morning.mp3",
-//   },
-//   {
-//     title: "Scary Shaper",
-//     audio: "audio_sample/Scary_Shaper.mp3",
-//   },
-//   {
-//     title: "君に花",
-//     audio: "audio_sample/君に花.mp3",
-//   },
-// ];
-
-// クイズ問題データ（ローカル用）
 const quizData = [
   {
-    title: "CENTER OF UNIVERSE",
-    audio: "audio/Q/01 CENTER OF UNIVERSE.m4a",
+    title: "穏やかな朝",
+    audio: "audio_sample/穏やかな朝.mp3",
   },
   {
-    title: "その向こうへ行こう",
-    audio: "audio/Q/02 その向こうへ行こう.m4a",
+    title: "2:23AM",
+    audio: "audio_sample/2_23_AM.mp3",
   },
   {
-    title: "NOT FOUND",
-    audio: "audio/Q/03 NOT FOUND.m4a",
+    title: "Morning",
+    audio: "audio_sample/Morning.mp3",
   },
   {
-    title: "スロースターター",
-    audio: "audio/Q/04 スロースターター.m4a",
+    title: "Scary Shaper",
+    audio: "audio_sample/Scary_Shaper.mp3",
   },
   {
-    title: "Surrender",
-    audio: "audio/Q/05 Surrender.m4a",
+    title: "君に花",
+    audio: "audio_sample/君に花.mp3",
   },
 ];
+
+// // クイズ問題データ（ローカル用）
+// const quizData = [
+//   {
+//     title: "CENTER OF UNIVERSE",
+//     audio: "audio/Q/01 CENTER OF UNIVERSE.m4a",
+//   },
+//   {
+//     title: "その向こうへ行こう",
+//     audio: "audio/Q/02 その向こうへ行こう.m4a",
+//   },
+//   {
+//     title: "NOT FOUND",
+//     audio: "audio/Q/03 NOT FOUND.m4a",
+//   },
+//   {
+//     title: "スロースターター",
+//     audio: "audio/Q/04 スロースターター.m4a",
+//   },
+//   {
+//     title: "Surrender",
+//     audio: "audio/Q/05 Surrender.m4a",
+//   },
+// ];
 
 // Questionクラス
 class Question {
