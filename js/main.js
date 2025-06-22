@@ -85,6 +85,7 @@ function renderQuestion() {
   $("#audio").attr("src", question.audio); // attribute（属性）を設定
   $("#answerInput").val("");
   $("#result").text("");
+  $("#submitBtn").prop("disabled", true); // 初期状態ではボタンを無効化
 }
 
 // 回答ボタンのイベント
@@ -118,8 +119,35 @@ function setupAnswerHandler() {
     });
 }
 
-// 初期表示
+// Enterキーで回答を送信できるようにする
+function setupEnterKey() {
+  $("#answerInput")
+    .off("keydown")
+    .on("keydown", function (e) {
+      if (e.key === "Enter") {
+        $("#submitBtn").click();
+      }
+    });
+}
+
+// 入力欄が空白の場合は回答ボタンを無効化
+function setupInputWatcher() {
+  $("#answerInput")
+    .off("input")
+    .on("input", function () {
+      // thisは(#answerInput)
+      if ($(this).val().trim()) {
+        $("#submitBtn").prop("disabled", false);
+      } else {
+        $("#submitBtn").prop("disabled", true);
+      }
+    });
+}
+
+// 初期設定
 $(function () {
   renderQuestion();
   setupAnswerHandler();
+  setupEnterKey();
+  setupInputWatcher();
 });
