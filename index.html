@@ -3,22 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <head>内にフォント読み込み -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+
     <title>イントロクイズ</title>
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div id="quiz-container">
-      <h2 id="question-number"></h2>
-      <audio src="" id="audio" controls></audio>
-      <div>
-        <input type="text" id="answerInput" placeholder="曲名を入力" />
-        <button id="submitBtn">回答する</button>
-      </div>
-      <div id="result"></div>
-    </div>
-    <!-- jquery読み込み -->
+    <h1>イントロクイズ</h1>
+
+    <!-- スタートボタン -->
+    <button id="startButton">クイズを始める</button>
+
+    <!-- カウントダウン表示 -->
+    <div id="countdown"></div>
+
+    <!-- 音声再生用 -->
+    <audio src="" id="introAudio"></audio>
+
+    <!-- 問題と選択肢 -->
+    <div id="quizArea"></div>
+
+    <!-- メッセージ（結果） -->
+    <div id="message"></div>
+
+    <!-- もう一度遊ぶボタン -->
+    <button id="restartButton" style="display: none">もう一度遊ぶ</button>
+
+    <!-- jQuery読み込み -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- <script src="js/quizData_prod.js"></script> -->
+    <script src="js/quizData_sample.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>
