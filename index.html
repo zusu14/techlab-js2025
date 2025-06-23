@@ -14,35 +14,39 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <h1>イントロクイズ</h1>
+    <div id="homeMenu">
+      <h1>イントロクイズ</h1>
+      <button id="startQuizBtn">クイズを始める</button>
+      <button id="showRankingBtn">ランキングを見る</button>
+    </div>
 
-    <!-- スタートボタン -->
-    <button id="startButton"></button>
+    <div id="quizContainer" style="display: none">
+      <!-- ここにクイズ画面（今までの要素）を配置 -->
+      <button id="backToHomeFromQuiz">ホームに戻る</button>
+      <!-- 既存のクイズ用要素をここに移動 -->
+      <h2 id="questionNumber"></h2>
+      <div id="countdown"></div>
+      <audio src="" id="introAudio"></audio>
+      <div id="quizArea"></div>
+      <div id="message"></div>
+      <button id="restartButton" style="display: none">もう一度遊ぶ</button>
+      <button id="showRankingAfterQuizBtn" style="display: none">
+        ランキングを見る
+      </button>
+    </div>
 
-    <!-- 第何問目 -->
-    <h2 id="questionNumber"></h2>
-
-    <!-- カウントダウン表示 -->
-    <div id="countdown"></div>
-
-    <!-- 音声再生用 -->
-    <audio src="" id="introAudio"></audio>
-
-    <!-- 問題と選択肢 -->
-    <div id="quizArea"></div>
-
-    <!-- メッセージ（結果） -->
-    <div id="message"></div>
-
-    <!-- もう一度遊ぶボタン -->
-    <button id="restartButton" style="display: none">もう一度遊ぶ</button>
+    <div id="rankingContainer" style="display: none">
+      <h2>ランキング</h2>
+      <div id="rankingList"></div>
+      <button id="backToHomeFromRanking">ホームに戻る</button>
+    </div>
 
     <!-- jQuery読み込み -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- ローカル用音源データ -->
-    <script src="js/quizData_prod.js"></script>
+    <!-- <script src="js/quizData_prod.js"></script> -->
     <!-- GitHub用音源データ -->
-    <!-- <script src="js/quizData_sample.js"></script> -->
+    <script src="js/quizData_sample.js"></script>
 
     <!-- Firebase -->
     <script type="module">
