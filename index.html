@@ -39,8 +39,44 @@
 
     <!-- jQuery読み込み -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- <script src="js/quizData_prod.js"></script> -->
-    <script src="js/quizData_sample.js"></script>
-    <script src="js/main.js"></script>
+    <!-- ローカル用音源データ -->
+    <script src="js/quizData_prod.js"></script>
+    <!-- GitHub用音源データ -->
+    <!-- <script src="js/quizData_sample.js"></script> -->
+
+    <!-- Firebase -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        serverTimestamp,
+        onSnapshot,
+        query,
+        orderBy,
+        limit,
+      } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+      import firebaseConfig from "./js/firebaseConfig.js";
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // グローバルに使えるようにwindowオブジェクトに設定
+      window.db = db;
+      window.firestoreFns = {
+        collection,
+        addDoc,
+        getDocs,
+        serverTimestamp,
+        onSnapshot,
+        query,
+        orderBy,
+        limit,
+      };
+    </script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
