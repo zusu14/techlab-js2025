@@ -286,17 +286,29 @@ $(document).ready(function () {
     $("#homeMenu").hide();
     $("#quizContainer").hide();
     $("#rankingContainer").show();
-    // Firestoreからランキング取得
-    const q = query(
-      collection(db, "scores"),
-      orderBy("score", "desc"), // スコアの降順
-      limit(10) // 上位10件取得
-    );
+
+    // Firestoreから全スコアをスコア降順で取得
+    const q = query(collection(db, "scores"), orderBy("score", "desc"));
     const querySnapshot = await getDocs(q);
-    let html = "<ol>";
+
+    // usernameごとに最高スコアのみ保持
+    const bestScores = {};
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // Firestore Timestampを日付文字列に変換
+      const name = data.name;
+      if (!bestScores[name] || data.score > bestScores[name].score) {
+        bestScores[name] = { ...data };
+      }
+    });
+
+    // スコア降順で並べ替え（最大10件）
+    const ranking = Object.values(bestScores)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+
+    // 表示
+    let html = "<ol>";
+    ranking.forEach((data) => {
       let dateStr = "";
       if (data.date && data.date.toDate) {
         const d = data.date.toDate();
