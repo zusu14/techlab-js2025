@@ -30,6 +30,7 @@ $(document).ready(function () {
     $("#quizArea").empty();
     $("#message").empty();
     $("#restartButton").hide();
+    $("#showRankingAfterQuizBtn").hide();
   }
 
   // カウントダウン表示
@@ -155,11 +156,38 @@ $(document).ready(function () {
         $("#message").append(
           "<br>全" + totalQuestions + "問中、" + correctCount + "問正解でした！"
         );
+        // 名前入力欄と保存ボタンを追加
+        $("#message").append(`
+          <div id="scoreSaveArea" style="margin-top:16px;">
+            <input type="text" id="usernameInput" placeholder="名前を入力" style="margin-right:8px;">
+            <button id="saveScoreBtn">スコアを保存</button>
+            <span id="saveScoreMsg" style="margin-left:8px;color:green;"></span>
+          </div>
+        `);
         $("#restartButton").show();
-        // スコアをFirestoreに保存(仮）)
-        const username = prompt("あなたの名前を入力してください:");
-        if (username) await saveScoreToFirestore(username, correctCount); // awaitで非同期処理を待つ
-        // ここでランキング取得・表示も可能
+        $("#showRankingAfterQuizBtn").show();
+
+        // 保存ボタンのイベント
+        $("#saveScoreBtn")
+          .off("click")
+          .on("click", async function () {
+            const username = $("#usernameInput").val().trim();
+            if (!username) {
+              $("#saveScoreMsg")
+                .css("color", "red")
+                .text("名前を入力してください");
+              return;
+            }
+            await saveScoreToFirestore(username, correctCount);
+            $("#saveScoreMsg").css("color", "green").text("保存しました！");
+            $("#saveScoreBtn").prop("disabled", true);
+            $("#usernameInput").prop("disabled", true);
+          });
+
+        // ボタンイベント
+        $("#showRankingAfterQuizBtn")
+          .off("click")
+          .on("click", showRankingScreen);
       } else {
         // 自動で次の問題へ
         $("#questionNumber")
@@ -203,6 +231,65 @@ $(document).ready(function () {
       showCountdown(3, () => playIntro(showQuiz));
     });
 
-  // 初期化
-  resetUI();
+  // ホーム画面表示
+  function showHome() {
+    $("#homeMenu").show();
+    $("#quizContainer").hide();
+    $("#rankingContainer").hide();
+  }
+
+  // クイズ画面表示
+  function showQuizScreen() {
+    $("#homeMenu").hide();
+    $("#quizContainer").show();
+    $("#rankingContainer").hide();
+    // クイズ初期化
+    resetUI();
+    // 最初の問題を出題
+    $("#startButton").hide();
+    $("#questionNumber").text("第1問").show();
+    $("#countdown").show();
+    showCountdown(3, () => playIntro(showQuiz));
+  }
+
+  // ランキング画面表示
+  async function showRankingScreen() {
+    $("#homeMenu").hide();
+    $("#quizContainer").hide();
+    $("#rankingContainer").show();
+    // Firestoreからランキング取得
+    const q = query(
+      collection(db, "scores"),
+      orderBy("score", "desc"), // スコアの降順
+      limit(10) // 上位10件取得
+    );
+    const querySnapshot = await getDocs(q);
+    let html = "<ol>";
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      // Firestore Timestampを日付文字列に変換
+      let dateStr = "";
+      if (data.date && data.date.toDate) {
+        const d = data.date.toDate();
+        dateStr = `${d.getFullYear()}/${
+          d.getMonth() + 1
+        }/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(
+          2,
+          "0"
+        )}`;
+      }
+      html += `<li>${data.name}：${data.score}点 <span style="color:#888;font-size:0.9em;">(${dateStr})</span></li>`;
+    });
+    html += "</ol>";
+    $("#rankingList").html(html);
+  }
+
+  // ページ移動のボタンイベント登録
+  $("#startQuizBtn").on("click", showQuizScreen);
+  $("#showRankingBtn").on("click", showRankingScreen);
+  $("#backToHomeFromQuiz").on("click", showHome);
+  $("#backToHomeFromRanking").on("click", showHome);
+
+  // 最初はホーム画面
+  showHome();
 });
