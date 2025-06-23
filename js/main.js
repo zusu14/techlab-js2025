@@ -12,7 +12,7 @@ const {
 } = window.firestoreFns;
 
 $(document).ready(function () {
-  let isFirstTime = true; // 1問目判定用bool
+  // クイズ進行用の状態グローバル変数
   let timer = null; // カウントダウン制御用
   let currentQuestionIndex = 0; // 出題データ選択用インデックス
   let correctCount = 0; // 正解数カウント変数
@@ -20,153 +20,83 @@ $(document).ready(function () {
   let questionCount = 0; // 今何問目か
   let usedIndexes = []; // 出題済みのインデックス
   let isComposing = false;
+  let playTimeDuration = 2000; // イントロ再生時間（ミリ秒）
 
-  // スタートボタン押下時処理
-  $("#startButton")
-    .off("click")
-    .on("click", function () {
-      // 二重実行防止
-      if (timer) return;
-      // 全問出題済み
-      if (questionCount >= totalQuestions) return;
-      console.log("click startButton");
+  // UI初期化
+  function resetUI() {
+    $("#startButton").show().text("クイズを始める").prop("disabled", false);
+    $("#questionNumber").empty();
+    $("#countdown").empty();
+    $("#quizArea").empty();
+    $("#message").empty();
+    $("#restartButton").hide();
+  }
 
-      // 表示を初期化
-      // $("#startButton").prop("disabled", true);
-      $("#startButton").hide();
-      $("#questionNumber").show();
-      $("#countdown").show();
-      $("#quizArea").empty();
-      $("#message").empty();
-
-      // 第何問目かを表示
-      $("#questionNumber").text("第" + (questionCount + 1) + "問");
-      // カウントダウン表示
-      let countdown = 3;
-      $("#countdown").text(countdown);
-
-      // カウントダウンの間イントロを再生
-      timer = setInterval(function () {
-        // デクリメント
-        countdown--;
-        if (countdown <= 0) {
-          clearInterval(timer);
-          $("#countdown").text("イントロ再生中");
-          playIntro();
-        } else {
-          $("#countdown").text(countdown);
-        }
-      }, 1000);
-    });
-
-  // イントロ再生関数
-  function playIntro() {
-    console.log("playIntro()");
-    // 未出題の中からランダムに選ぶ
-    let availableIndexes = quizData
-      // 要素は受け取るけど使わない
-      // 配列から配列を作成（今回はインデックスのみ抽出）
-      .map(function (_, i) {
-        return i;
-      })
-      // 条件に一致する要素のみ保持する
-      .filter(function (i) {
-        return !usedIndexes.includes(i);
-      });
-    if (availableIndexes.length === 0) return;
-
-    // 使用可能なインデックスの中から、乱数生成
-    currentQuestionIndex =
-      availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
-    usedIndexes.push(currentQuestionIndex);
-    console.log("currentQuestionIndex : " + currentQuestionIndex);
-
-    // イントロ再生
-    // jQueryでAudio要素は扱えないため、ネイティブな書き方をする
-    const audio = document.getElementById("introAudio");
-    audio.src = quizData[currentQuestionIndex].audio;
-    audio.play();
-
-    // 指定秒数イントロ再生後、クイズ関数実行
-    setTimeout(function () {
-      audio.pause();
-      $("#countdown").hide();
-      showQuiz();
+  // カウントダウン表示
+  function showCountdown(count, callback) {
+    $("#countdown").text(count);
+    timer = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        clearInterval(timer);
+        $("#countdown").text("イントロ再生中");
+        callback();
+      } else {
+        $("#countdown").text(count);
+      }
     }, 1000);
   }
 
-  // クイズ関数
-  function showQuiz() {
-    // インデックスからクイズデータを取得
-    const correctTitle = quizData[currentQuestionIndex].title;
+  // 未出題のデータからランダムにインデックス取得
+  function getRandomQuestionIndex() {
+    const availableIndexes = quizData
+      .map((_, i) => i) // マッピングでインデックスのみを取得する
+      .filter((i) => !usedIndexes.includes(i)); // 出題済みのインデックスを除外
+    if (availableIndexes.length === 0) return null; // 全て出題済みの場合はnullを返す
+    return availableIndexes[
+      Math.floor(Math.random() * availableIndexes.length)
+    ];
+  }
 
-    // 問題文を表示
-    // $("#quizArea").empty();
-    const questionElem = $("<h2>").text("この曲のタイトルは？");
+  // イントロ再生
+  function playIntro(callback) {
+    currentQuestionIndex = getRandomQuestionIndex();
+    if (currentQuestionIndex === null) return; // 全て出題済みの場合は終了
+    usedIndexes.push(currentQuestionIndex);
+
+    const audio = document.getElementById("introAudio"); // Audio要素はネイティブ
+    audio.src = quizData[currentQuestionIndex].audio;
+    audio.currentTime = 0; // 再生位置を先頭に戻す
+    audio.play();
+
+    // 指定秒再生後、クイズ出題
+    setTimeout(() => {
+      audio.pause();
+      $("#countdown").hide();
+      callback();
+    }, playTimeDuration);
+  }
+
+  // 問題表示
+  function showQuiz() {
+    const correctTitle = quizData[currentQuestionIndex].title;
+    $("#quizArea").empty(); // 問題エリアをクリア
+    const questionElem = $("<h3>").text("この曲のタイトルは？");
     const inputElem = $(
       '<input type="text" id="answerInput" placeholder="曲名を入力">'
     );
     const submitBtn = $('<button id="submitBtn">回答する</button>');
-
+    // 問題文と入力欄、ボタンを追加
     $("#quizArea").append(questionElem, inputElem, submitBtn);
 
-    // 回答ボタン押下時の処理
+    // 回答ボタン押下時
     $("#submitBtn")
       .off("click")
-      .on("click", function () {
-        const userAnswer = $("#answerInput").val().trim();
-        if (!userAnswer) {
-          $("#message").text("回答を入力してください。");
-          return;
-        }
-        if (userAnswer === correctTitle) {
-          $("#message").text("正解です！");
-          correctCount++;
-        } else {
-          $("#message").text("残念、不正解！");
-        }
-        // 正解タイトル
-        $("#message").append("<br>「" + correctTitle + "」");
-        // CDジャケット画像
-        $("#message").append(
-          "<br><img src='" +
-            quizData[currentQuestionIndex].img +
-            "' alt='CDジャケット'>"
-        );
-
-        $("#submitBtn").prop("disabled", true);
-        $("#answerInput").prop("disabled", true);
-
-        // 回答後に楽曲を再生
-        const audio = document.getElementById("introAudio");
-        audio.currentTime = 0;
-        audio.play();
-        setTimeout(function () {
-          audio.pause();
-          timer = null;
-          questionCount++;
-
-          if (questionCount >= totalQuestions) {
-            // 全問終了
-            $("#message").append(
-              "<br>全" +
-                totalQuestions +
-                "問中、" +
-                correctCount +
-                "問正解でした！"
-            );
-            $("#restartButton").show();
-            // スコアをFirestoreに保存
-            const username = prompt("あなたの名前を入力してください:");
-            saveScoreToFirestore(username, correctCount);
-          } else {
-            // 自動で次の問題へ
-            $("#startButton").click();
-          }
-        }, 8000); // 8秒再生
+      .on("click", () => {
+        handleAnswer(correctTitle); // 回答処理
       });
 
-    // エンターキーでも送信できるように
+    // エンターキー対応（日本語入力考慮）
     $("#answerInput")
       .off("compositionstart compositionend keydown")
       .on("compositionstart", function () {
@@ -182,13 +112,68 @@ $(document).ready(function () {
       });
   }
 
-  // もう一度遊ぶボタンクリック時の処理
-  $("#restartButton").click(function () {
-    // ページの再読み込み
-    location.reload();
-  });
+  // 回答処理
+  function handleAnswer(correctTitle) {
+    const userAnswer = $("#answerInput").val().trim();
+    // 空欄チェック
+    if (!userAnswer) {
+      $("#message").text("回答を入力してください。");
+      return;
+    }
+    if (userAnswer === correctTitle) {
+      $("#message").text("正解です！");
+      correctCount++;
+    } else {
+      $("#message").text("残念、不正解！");
+    }
+    // 正解タイトルとCDジャケット画像を表示ß
+    $("#message").append("<br>「" + correctTitle + "」");
+    $("#message").append(
+      "<br><img src='" +
+        quizData[currentQuestionIndex].img +
+        "' alt='CDジャケット'>"
+    );
+    // ボタンと入力欄を無効化
+    $("#submitBtn").prop("disabled", true);
+    $("#answerInput").prop("disabled", true);
 
-  // スコアをFirestoreに保存
+    // 回答後に楽曲を再生し、次の問題または終了
+    playAnswerAudio();
+  }
+
+  // 回答後の楽曲再生と次の問題遷移
+  function playAnswerAudio() {
+    const audio = document.getElementById("introAudio");
+    audio.currentTime = 0; // 再生位置を先頭に戻す
+    audio.play();
+    setTimeout(async function () {
+      // Firestoreにスコアを保存するためasyncに変更
+      audio.pause();
+      questionCount++;
+      if (questionCount >= totalQuestions) {
+        // 全問終了
+        $("#message").append(
+          "<br>全" + totalQuestions + "問中、" + correctCount + "問正解でした！"
+        );
+        $("#restartButton").show();
+        // スコアをFirestoreに保存(仮）)
+        const username = prompt("あなたの名前を入力してください:");
+        if (username) await saveScoreToFirestore(username, correctCount); // awaitで非同期処理を待つ
+        // ここでランキング取得・表示も可能
+      } else {
+        // 自動で次の問題へ
+        $("#questionNumber")
+          .text("第" + (questionCount + 1) + "問")
+          .show();
+        $("#countdown").show();
+        $("#quizArea").empty();
+        $("#message").empty();
+        showCountdown(3, () => playIntro(showQuiz));
+      }
+    }, 7000);
+  }
+
+  // Firestoreにスコア保存
   async function saveScoreToFirestore(username, score) {
     await addDoc(collection(db, "scores"), {
       name: username,
@@ -196,4 +181,28 @@ $(document).ready(function () {
       date: serverTimestamp(),
     });
   }
+
+  // もう一度遊ぶ
+  $("#restartButton").on("click", () => {
+    location.reload();
+  });
+
+  // スタートボタン押下時
+  $("#startButton")
+    .off("click")
+    .on("click", function () {
+      if (timer) return;
+      if (questionCount >= totalQuestions) return;
+      $("#startButton").hide();
+      $("#questionNumber")
+        .text("第" + (questionCount + 1) + "問")
+        .show();
+      $("#countdown").show();
+      $("#quizArea").empty();
+      $("#message").empty();
+      showCountdown(3, () => playIntro(showQuiz));
+    });
+
+  // 初期化
+  resetUI();
 });
