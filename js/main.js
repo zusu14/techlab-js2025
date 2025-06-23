@@ -23,17 +23,24 @@ $(document).ready(function () {
   let playTimeDuration = 3000; // イントロ再生時間（ミリ秒）
   let correctPlayTimeDuration = 7000; // 正解イントロ再生時間（ミリ秒）
 
+  // 変数初期化
+  function resetParam() {
+    currentQuestionIndex = 0; // 出題データ選択用インデックス
+    correctCount = 0; // 正解数カウント変数
+    questionCount = 0; // 今何問目か
+    usedIndexes = []; // 出題済みのインデックス
+  }
   // UI初期化
   function resetUI() {
-    $("#startButton").show().text("クイズを始める").prop("disabled", false);
+    // $("#startButton").show().text("クイズを始める").prop("disabled", false);
     $("#questionNumber").empty();
     $("#countdown").empty();
     $("#quizArea").empty();
     $("#message").empty();
     $("#restartButton").hide();
     $("#showRankingAfterQuizBtn").hide();
-    // $("#backToHomeFromQuiz").hide();
-    // $("#backToHomeFromRanking").hide();
+    $("#backToHomeFromQuiz").hide();
+    $("#backToHomeFromRanking").hide();
   }
 
   // カウントダウン表示
@@ -170,10 +177,10 @@ $(document).ready(function () {
         );
         // 名前入力欄と保存ボタンを追加
         $("#message").append(`
-          <div id="scoreSaveArea" style="margin-top:16px;">
-            <input type="text" id="usernameInput" placeholder="名前を入力" style="margin-right:8px;">
+          <div id="scoreSaveArea" >
+            <input type="text" id="usernameInput" placeholder="名前を入力" >
             <button id="saveScoreBtn">スコアを保存</button>
-            <span id="saveScoreMsg" style="margin-left:8px;"></span>
+            <span id="saveScoreMsg" ></span>
           </div>
         `);
         $("#restartButton").show();
@@ -227,25 +234,8 @@ $(document).ready(function () {
   // もう一度遊ぶ
   $("#restartButton").on("click", () => {
     // console.log("Restart button clicked");
-    location.reload();
+    showQuizScreen();
   });
-
-  // スタートボタン押下時
-  $("#startButton")
-    .off("click")
-    .on("click", function () {
-      // console.log("Start button clicked");
-      if (timer) return;
-      if (questionCount >= totalQuestions) return;
-      $("#startButton").hide();
-      $("#questionNumber")
-        .text("第" + (questionCount + 1) + "問")
-        .show();
-      $("#countdown").show();
-      $("#quizArea").empty();
-      $("#message").empty();
-      showCountdown(3, () => playIntro(showQuiz));
-    });
 
   // ホーム画面表示
   function showHome() {
@@ -253,21 +243,13 @@ $(document).ready(function () {
     $("#homeMenu").show();
     $("#quizContainer").hide();
     $("#rankingContainer").hide();
-
-    // // 音源を停止
-    // const audio = document.getElementById("introAudio");
-    // if (audio) {
-    //   console.log("音源を停止");
-    //   audio.pause();
-    //   audio.src = "";
-    //   audio.reload(); // 音源をリセット
-    //   audio.currentTime = 0;
-    // }
   }
 
   // クイズ画面表示
   function showQuizScreen() {
     // console.log("showQuizScreen called");
+    resetUI();
+    resetParam();
     $("#homeMenu").hide();
     $("#quizContainer").show();
     $("#rankingContainer").hide();
@@ -323,6 +305,7 @@ $(document).ready(function () {
     });
     html += "</ol>";
     $("#rankingList").html(html);
+    $("#backToHomeFromRanking").show();
   }
 
   // ページ移動のボタンイベント登録
