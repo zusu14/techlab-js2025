@@ -3,13 +3,13 @@ $(document).ready(function () {
   let timer = null; // カウントダウン制御用
   let currentQuestionIndex = 0; // 出題データ選択用インデックス
   let correctCount = 0; // 正解数カウント変数
-  let totalQuestions = 3; // 出題数
+  let totalQuestions = 5; // 出題数
   let questionCount = 0; // 今何問目か
   let usedIndexes = []; // 出題済みのインデックス
   let isComposing = false;
 
   // スタートボタン押下時処理
-  $("#startButton").click(function () {
+  $("#startButton").on("click", function () {
     // 二重実行防止
     if (timer) return;
     // 全問出題済み
@@ -17,16 +17,20 @@ $(document).ready(function () {
     console.log("click startButton");
 
     // 表示を初期化
-    $("#startButton").prop("disabled", true);
+    // $("#startButton").prop("disabled", true);
+    $("#startButton").hide();
+    $("#questionNumber").show();
     $("#countdown").show();
     $("#quizArea").empty();
     $("#message").empty();
 
-    // カウントダウン用
+    // 第何問目かを表示
+    $("#questionNumber").text("第" + (questionCount + 1) + "問");
+    // カウントダウン表示
     let countdown = 3;
     $("#countdown").text(countdown);
 
-    // カウントダウン
+    // カウントダウンの間イントロを再生
     timer = setInterval(function () {
       // デクリメント
       countdown--;
@@ -82,7 +86,7 @@ $(document).ready(function () {
     const correctTitle = quizData[currentQuestionIndex].title;
 
     // 問題文を表示
-    $("#quizArea").empty();
+    // $("#quizArea").empty();
     const questionElem = $("<h2>").text("この曲のタイトルは？");
     const inputElem = $(
       '<input type="text" id="answerInput" placeholder="曲名を入力">'
@@ -104,32 +108,43 @@ $(document).ready(function () {
           $("#message").text("正解です！");
           correctCount++;
         } else {
-          $("#message").text(
-            "残念、不正解！ 正解は「" + correctTitle + "」です"
-          );
+          $("#message").text("残念、不正解！");
         }
+        // 正解タイトル
+        $("#message").append("<br>「" + correctTitle + "」");
+        // CDジャケット画像
+        $("#message").append(
+          "<br><img src='" +
+            quizData[currentQuestionIndex].img +
+            "' alt='CDジャケット'>"
+        );
+
         $("#submitBtn").prop("disabled", true);
         $("#answerInput").prop("disabled", true);
 
-        timer = null;
-        questionCount++;
+        // 回答後に楽曲を再生
+        const audio = document.getElementById("introAudio");
+        audio.currentTime = 0;
+        audio.play();
+        setTimeout(function () {
+          audio.pause();
+          timer = null;
+          questionCount++;
 
-        if (questionCount >= totalQuestions) {
-          $("#message").append(
-            "<br>全" +
-              totalQuestions +
-              "問中、" +
-              correctCount +
-              "問正解でした！"
-          );
-          $("#restartButton").show();
-        } else {
-          if (isFirstTime) {
-            isFirstTime = false;
-            $("#startButton").text("つぎの問題");
+          if (questionCount >= totalQuestions) {
+            $("#message").append(
+              "<br>全" +
+                totalQuestions +
+                "問中、" +
+                correctCount +
+                "問正解でした！"
+            );
+            $("#restartButton").show();
+          } else {
+            // 自動で次の問題へ
+            $("#startButton").click();
           }
-          $("#startButton").prop("disabled", false);
-        }
+        }, 8000); // 8秒再生
       });
 
     // エンターキーでも送信できるように
