@@ -43,7 +43,7 @@ $(document).ready(function () {
       count--;
       if (count <= 0) {
         clearInterval(timer);
-        $("#countdown").text("イントロ再生中");
+        $("#countdown").text("🎶 イントロ再生中");
         callback();
       } else {
         $("#countdown").text(count);
@@ -90,7 +90,7 @@ $(document).ready(function () {
     // console.log("showQuiz called");
     const correctTitle = quizData[currentQuestionIndex].title;
     $("#quizArea").empty(); // 問題エリアをクリア
-    const questionElem = $("<h3>").text("この曲のタイトルは？");
+    const questionElem = $("<h3>").text("この曲のタイトルは❓");
     const inputElem = $(
       '<input type="text" id="answerInput" placeholder="曲名を入力">'
     );
@@ -133,10 +133,10 @@ $(document).ready(function () {
       return;
     }
     if (userAnswer === correctTitle) {
-      $("#message").text("正解です！");
+      $("#message").text("⭕️ 正解です！");
       correctCount++;
     } else {
-      $("#message").text("残念、不正解！");
+      $("#message").text("❌ 残念、不正解！");
     }
     // 正解タイトルとCDジャケット画像を表示ß
     $("#message").append("<br>「" + correctTitle + "」");
