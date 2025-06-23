@@ -1,9 +1,11 @@
 * {
   box-sizing: border-box;
-  /* margin: 0;
-  padding: 0; */
 }
-
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif; /* クロスプラットフォーム対応 */
@@ -12,21 +14,44 @@ body {
 }
 
 h1,
-h2,
-h3 {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+h2 {
+  text-align: center;
+  margin: 24px 0 16px 0;
+  letter-spacing: 0.2rem;
 }
 
+h3 {
+  margin: 0;
+  padding: 0;
+}
+
+/* メインコンテナ */
 #homeMenu,
 #quizContainer,
-#quizArea,
 #rankingContainer {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /* min-height: 50vh; */
+  /* max-height: 480px; */
+  margin: 0 auto;
+}
+
+#quizArea {
+  width: 100%;
+  display: flex;
+  /* flex-wrap: wrap; */
+  flex-direction: column;
+  align-items: center;
+}
+
+#answerInput {
+  width: 300px;
+}
+
+#countdown {
+  font-size: 24px;
 }
 
 #message {
@@ -35,12 +60,18 @@ h3 {
   align-items: center;
   text-align: center;
 }
+
 #scoreSaveArea {
+  width: 300px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 }
 
-button {
-  width: 70%;
-  margin: 5px 0;
+#usernameInput {
+  width: 200px;
+}
+
+button:not(#saveScoreBtn) {
+  width: 300px;
+  margin: 2.5px 0;
 }
