@@ -20,7 +20,8 @@ $(document).ready(function () {
   let questionCount = 0; // 今何問目か
   let usedIndexes = []; // 出題済みのインデックス
   let isComposing = false;
-  let playTimeDuration = 2000; // イントロ再生時間（ミリ秒）
+  let playTimeDuration = 3000; // イントロ再生時間（ミリ秒）
+  let correctPlayTimeDuration = 7000; // 正解イントロ再生時間（ミリ秒）
 
   // UI初期化
   function resetUI() {
@@ -31,6 +32,8 @@ $(document).ready(function () {
     $("#message").empty();
     $("#restartButton").hide();
     $("#showRankingAfterQuizBtn").hide();
+    // $("#backToHomeFromQuiz").hide();
+    // $("#backToHomeFromRanking").hide();
   }
 
   // カウントダウン表示
@@ -53,6 +56,7 @@ $(document).ready(function () {
     const availableIndexes = quizData
       .map((_, i) => i) // マッピングでインデックスのみを取得する
       .filter((i) => !usedIndexes.includes(i)); // 出題済みのインデックスを除外
+    // console.log("Available indexes:", availableIndexes);
     if (availableIndexes.length === 0) return null; // 全て出題済みの場合はnullを返す
     return availableIndexes[
       Math.floor(Math.random() * availableIndexes.length)
@@ -61,7 +65,9 @@ $(document).ready(function () {
 
   // イントロ再生
   function playIntro(callback) {
+    // console.log("playIntro called");
     currentQuestionIndex = getRandomQuestionIndex();
+    // console.log("Current question index:", currentQuestionIndex);
     if (currentQuestionIndex === null) return; // 全て出題済みの場合は終了
     usedIndexes.push(currentQuestionIndex);
 
@@ -72,6 +78,7 @@ $(document).ready(function () {
 
     // 指定秒再生後、クイズ出題
     setTimeout(() => {
+      // console.log("イントロ再生終了");
       audio.pause();
       $("#countdown").hide();
       callback();
@@ -80,6 +87,7 @@ $(document).ready(function () {
 
   // 問題表示
   function showQuiz() {
+    // console.log("showQuiz called");
     const correctTitle = quizData[currentQuestionIndex].title;
     $("#quizArea").empty(); // 問題エリアをクリア
     const questionElem = $("<h3>").text("この曲のタイトルは？");
@@ -94,6 +102,7 @@ $(document).ready(function () {
     $("#submitBtn")
       .off("click")
       .on("click", () => {
+        // console.log("Submit button clicked");
         handleAnswer(correctTitle); // 回答処理
       });
 
@@ -107,6 +116,7 @@ $(document).ready(function () {
         isComposing = false;
       })
       .on("keydown", function (e) {
+        // console.log("Key pressed:", e.key);
         if (e.key === "Enter" && !isComposing) {
           $("#submitBtn").click();
         }
@@ -115,6 +125,7 @@ $(document).ready(function () {
 
   // 回答処理
   function handleAnswer(correctTitle) {
+    // console.log("handleAnswer called");
     const userAnswer = $("#answerInput").val().trim();
     // 空欄チェック
     if (!userAnswer) {
@@ -144,11 +155,12 @@ $(document).ready(function () {
 
   // 回答後の楽曲再生と次の問題遷移
   function playAnswerAudio() {
+    // console.log("playAnswerAudio called");
     const audio = document.getElementById("introAudio");
     audio.currentTime = 0; // 再生位置を先頭に戻す
     audio.play();
+    // Firestoreにスコアを保存するためasyncに変更
     setTimeout(async function () {
-      // Firestoreにスコアを保存するためasyncに変更
       audio.pause();
       questionCount++;
       if (questionCount >= totalQuestions) {
@@ -161,11 +173,12 @@ $(document).ready(function () {
           <div id="scoreSaveArea" style="margin-top:16px;">
             <input type="text" id="usernameInput" placeholder="名前を入力" style="margin-right:8px;">
             <button id="saveScoreBtn">スコアを保存</button>
-            <span id="saveScoreMsg" style="margin-left:8px;color:green;"></span>
+            <span id="saveScoreMsg" style="margin-left:8px;"></span>
           </div>
         `);
         $("#restartButton").show();
         $("#showRankingAfterQuizBtn").show();
+        $("#backToHomeFromQuiz").show();
 
         // 保存ボタンのイベント
         $("#saveScoreBtn")
@@ -179,7 +192,7 @@ $(document).ready(function () {
               return;
             }
             await saveScoreToFirestore(username, correctCount);
-            $("#saveScoreMsg").css("color", "green").text("保存しました！");
+            $("#saveScoreMsg").text("保存しました！");
             $("#saveScoreBtn").prop("disabled", true);
             $("#usernameInput").prop("disabled", true);
           });
@@ -198,11 +211,12 @@ $(document).ready(function () {
         $("#message").empty();
         showCountdown(3, () => playIntro(showQuiz));
       }
-    }, 7000);
+    }, correctPlayTimeDuration);
   }
 
   // Firestoreにスコア保存
   async function saveScoreToFirestore(username, score) {
+    // console.log("Saving score to Firestore:", username, score);
     await addDoc(collection(db, "scores"), {
       name: username,
       score: score,
@@ -212,6 +226,7 @@ $(document).ready(function () {
 
   // もう一度遊ぶ
   $("#restartButton").on("click", () => {
+    // console.log("Restart button clicked");
     location.reload();
   });
 
@@ -219,6 +234,7 @@ $(document).ready(function () {
   $("#startButton")
     .off("click")
     .on("click", function () {
+      // console.log("Start button clicked");
       if (timer) return;
       if (questionCount >= totalQuestions) return;
       $("#startButton").hide();
@@ -233,13 +249,25 @@ $(document).ready(function () {
 
   // ホーム画面表示
   function showHome() {
+    // console.log("showHome called");
     $("#homeMenu").show();
     $("#quizContainer").hide();
     $("#rankingContainer").hide();
+
+    // // 音源を停止
+    // const audio = document.getElementById("introAudio");
+    // if (audio) {
+    //   console.log("音源を停止");
+    //   audio.pause();
+    //   audio.src = "";
+    //   audio.reload(); // 音源をリセット
+    //   audio.currentTime = 0;
+    // }
   }
 
   // クイズ画面表示
   function showQuizScreen() {
+    // console.log("showQuizScreen called");
     $("#homeMenu").hide();
     $("#quizContainer").show();
     $("#rankingContainer").hide();
@@ -254,6 +282,7 @@ $(document).ready(function () {
 
   // ランキング画面表示
   async function showRankingScreen() {
+    // console.log("showRankingScreen called");
     $("#homeMenu").hide();
     $("#quizContainer").hide();
     $("#rankingContainer").show();

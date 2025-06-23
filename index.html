@@ -14,16 +14,15 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <!-- Home -->
     <div id="homeMenu">
       <h1>イントロクイズ</h1>
       <button id="startQuizBtn">クイズを始める</button>
       <button id="showRankingBtn">ランキングを見る</button>
     </div>
 
+    <!-- クイズ -->
     <div id="quizContainer" style="display: none">
-      <!-- ここにクイズ画面（今までの要素）を配置 -->
-      <button id="backToHomeFromQuiz">ホームに戻る</button>
-      <!-- 既存のクイズ用要素をここに移動 -->
       <h2 id="questionNumber"></h2>
       <div id="countdown"></div>
       <audio src="" id="introAudio"></audio>
@@ -33,8 +32,12 @@
       <button id="showRankingAfterQuizBtn" style="display: none">
         ランキングを見る
       </button>
+      <button id="backToHomeFromQuiz" style="display: none">
+        ホームに戻る
+      </button>
     </div>
 
+    <!-- ランキング -->
     <div id="rankingContainer" style="display: none">
       <h2>ランキング</h2>
       <div id="rankingList"></div>
@@ -44,9 +47,9 @@
     <!-- jQuery読み込み -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- ローカル用音源データ -->
-    <!-- <script src="js/quizData_prod.js"></script> -->
+    <script src="js/quizData_prod.js"></script>
     <!-- GitHub用音源データ -->
-    <script src="js/quizData_sample.js"></script>
+    <!-- <script src="js/quizData_sample.js"></script> -->
 
     <!-- Firebase -->
     <script type="module">
