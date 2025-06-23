@@ -1,5 +1,6 @@
 .DS_Store
 .vscode/
+images/prod/
 audio/
 js/quizData_prod.js
-images/prod/
+js/firebaseConfig.js

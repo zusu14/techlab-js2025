@@ -1,48 +1,63 @@
+// Firestoreの関数うをwindowオブジェクトから取得
+const db = window.db;
+const {
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+} = window.firestoreFns;
+
 $(document).ready(function () {
   let isFirstTime = true; // 1問目判定用bool
   let timer = null; // カウントダウン制御用
   let currentQuestionIndex = 0; // 出題データ選択用インデックス
   let correctCount = 0; // 正解数カウント変数
-  let totalQuestions = 5; // 出題数
+  let totalQuestions = 2; // 出題数
   let questionCount = 0; // 今何問目か
   let usedIndexes = []; // 出題済みのインデックス
   let isComposing = false;
 
   // スタートボタン押下時処理
-  $("#startButton").on("click", function () {
-    // 二重実行防止
-    if (timer) return;
-    // 全問出題済み
-    if (questionCount >= totalQuestions) return;
-    console.log("click startButton");
+  $("#startButton")
+    .off("click")
+    .on("click", function () {
+      // 二重実行防止
+      if (timer) return;
+      // 全問出題済み
+      if (questionCount >= totalQuestions) return;
+      console.log("click startButton");
 
-    // 表示を初期化
-    // $("#startButton").prop("disabled", true);
-    $("#startButton").hide();
-    $("#questionNumber").show();
-    $("#countdown").show();
-    $("#quizArea").empty();
-    $("#message").empty();
+      // 表示を初期化
+      // $("#startButton").prop("disabled", true);
+      $("#startButton").hide();
+      $("#questionNumber").show();
+      $("#countdown").show();
+      $("#quizArea").empty();
+      $("#message").empty();
 
-    // 第何問目かを表示
-    $("#questionNumber").text("第" + (questionCount + 1) + "問");
-    // カウントダウン表示
-    let countdown = 3;
-    $("#countdown").text(countdown);
+      // 第何問目かを表示
+      $("#questionNumber").text("第" + (questionCount + 1) + "問");
+      // カウントダウン表示
+      let countdown = 3;
+      $("#countdown").text(countdown);
 
-    // カウントダウンの間イントロを再生
-    timer = setInterval(function () {
-      // デクリメント
-      countdown--;
-      if (countdown <= 0) {
-        clearInterval(timer);
-        $("#countdown").text("イントロ再生中");
-        playIntro();
-      } else {
-        $("#countdown").text(countdown);
-      }
-    }, 1000);
-  });
+      // カウントダウンの間イントロを再生
+      timer = setInterval(function () {
+        // デクリメント
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          $("#countdown").text("イントロ再生中");
+          playIntro();
+        } else {
+          $("#countdown").text(countdown);
+        }
+      }, 1000);
+    });
 
   // イントロ再生関数
   function playIntro() {
@@ -132,6 +147,7 @@ $(document).ready(function () {
           questionCount++;
 
           if (questionCount >= totalQuestions) {
+            // 全問終了
             $("#message").append(
               "<br>全" +
                 totalQuestions +
@@ -140,6 +156,9 @@ $(document).ready(function () {
                 "問正解でした！"
             );
             $("#restartButton").show();
+            // スコアをFirestoreに保存
+            const username = prompt("あなたの名前を入力してください:");
+            saveScoreToFirestore(username, correctCount);
           } else {
             // 自動で次の問題へ
             $("#startButton").click();
@@ -169,14 +188,12 @@ $(document).ready(function () {
     location.reload();
   });
 
-  // // シャッフル関数（FisherーYates、よく使われるアルゴリズムらしい）
-  // function shuffleArray(array) {
-  //   // 配列の末尾から先頭へ向けてループ（要素数-1）回
-  //   for (let i = array.length - 1; i > 0; i--) {
-  //     // 0以上i以下のランダムな整数jを生成
-  //     const j = Math.floor(Math.random() * (i + 1));
-  //     // 要素の入れ替え
-  //     [array[i], array[j]] = [array[j], array[i]];
-  //   }
-  // }
+  // スコアをFirestoreに保存
+  async function saveScoreToFirestore(username, score) {
+    await addDoc(collection(db, "scores"), {
+      name: username,
+      score: score,
+      date: serverTimestamp(),
+    });
+  }
 });
